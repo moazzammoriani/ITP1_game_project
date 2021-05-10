@@ -1,12 +1,3 @@
-/*
-
-The Game Project
-
-Week 3
-
-Game interaction
-
-*/
 
 
 var gameChar_x;
@@ -36,9 +27,9 @@ function setup()
 function draw()
 {
 
-	///////////DRAWING CODE//////////
+	
 
-	background(100,155,255); //fill the sky blue
+	background(100,155,255); 
 
 
 	noStroke();
@@ -61,7 +52,6 @@ function draw()
 	else{
 		isFalling = false;
 	}
-
 
 
 
@@ -573,13 +563,8 @@ function draw()
 
 	if(isFalling || isPlummeting)
 	{
-		// add your jumping facing forwards code
-
-
-
-
+		
 	gameChar_y += 5;
-
 
 	}
 
@@ -610,11 +595,6 @@ function keyPressed()
 
 
 
-	//open up the console to see how these work
-	console.log("keyPressed: " + key);
-	console.log("keyPressed: " + keyCode);
-
-
 
 }
 
@@ -637,7 +617,4 @@ function keyReleased()
 
 
 
-
-	console.log("keyReleased: " + key);
-	console.log("keyReleased: " + keyCode);
 }
