@@ -11,12 +11,21 @@ function setup()
 	createCanvas(1024, 576);
 	floorPos_y = height * 3/4;
 	gameChar_x = width/2;
-	gameChar_y = floorPos_y + 25;
+	gameChar_y = floorPos_y - 30;
 
 	isLeft = false;
 	isRight = false;
 	isFalling = false;
 	isPlummeting = false;
+
+	collectable = {
+		x_pos: 100,
+		y_pos: 400,
+		size: 1,
+		isFound: false
+
+	}
+
 
 	canyon = {
 		x_pos: 100,
@@ -568,18 +577,47 @@ function draw()
 
 	}
 
+	if (!collectable.isFound){
+		//Collectable
+	
+	
+	fill(252, 197, 18);
+	stroke(0);
+	strokeWeight(0);
+	ellipse(collectable.x_pos, collectable.y_pos, 35 * collectable.size, 35 * collectable.size);
+	noStroke();
+	
+	noFill();
+	strokeWeight(1);
+	stroke(0);
+	ellipse(collectable.x_pos - (434 - 434), collectable.y_pos - (397 - 397), 30 * collectable.size, 30 * collectable.size)
+
+	noStroke();
+	fill(255);
+	textSize(25*collectable.size);
+	text('B', collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406));
+
+	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
+	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
+	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
+	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
+
+	}
+
+
+	if (dist(collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406), gameChar_x, gameChar_y - 30) < 50){
+		collectable.isFound = true;
+	}
 
 	
-	///////////INTERACTION CODE//////////
-	//Put conditional statements to move the game character below here
+
 
 }
 
 
 function keyPressed()
 {
-	// if statements to control the animation of the character when
-	// keys are pressed.
+
 
 	if (keyCode ==  37){
 		isLeft = true;
@@ -600,8 +638,7 @@ function keyPressed()
 
 function keyReleased()
 {
-	// if statements to control the animation of the character when
-	// keys are released.
+
 
 	if (keyCode ==  37){
 		isLeft = false;
