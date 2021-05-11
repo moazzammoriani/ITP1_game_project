@@ -11,7 +11,7 @@ function setup()
 	createCanvas(1024, 576);
 	floorPos_y = height * 3/4;
 	gameChar_x = width/2;
-	gameChar_y = floorPos_y - 30;
+	gameChar_y = floorPos_y ;
 
 	isLeft = false;
 	isRight = false;
@@ -40,12 +40,12 @@ function draw()
 
 	background(100,155,255); 
 
-
+	//Ground
 	noStroke();
 	fill(0,155,0);
-	rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
-
-	//draw the canyon
+	rect(0, floorPos_y, width, height - floorPos_y); 
+	
+	//Canyon
 	fill(100, 155, 255);
 	noStroke();
 	rect(canyon.x_pos, 429, canyon.width, 150);
@@ -54,7 +54,7 @@ function draw()
 
 
 
-	if (gameChar_y < floorPos_y + 25){
+	if (gameChar_y < floorPos_y + 18){
 		isFalling = true;
 	}
 
@@ -605,12 +605,19 @@ function draw()
 	}
 
 
-	if (dist(collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406), gameChar_x, gameChar_y - 30) < 50){
+	if (dist(collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406), gameChar_x, gameChar_y - 30) < 30){
 		collectable.isFound = true;
 	}
 
-	
 
+	if (gameChar_x > canyon.x_pos && gameChar_x < (canyon.x_pos + canyon.width)){
+		isPlummeting = true;
+
+	}
+
+	else{
+		isPlummeting = false;
+	}
 
 }
 
