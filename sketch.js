@@ -3,9 +3,10 @@
 var gameChar_x;
 var gameChar_y;
 var floorPos_y;
+var trees_x, treePos_y;
 var canyon;
 var isLeft, isRight, isJumping, isFalling, isPlummeting;
-
+var scrollPos;
 function setup()
 {
 	createCanvas(1024, 576);
@@ -17,6 +18,10 @@ function setup()
 	isRight = false;
 	isFalling = false;
 	isPlummeting = false;
+	scrollPos = 0;
+
+	trees_x = [50, 300, 700];
+	treePos_y = floorPos_y - 167;
 
 	collectable = {
 		x_pos: 100,
@@ -28,7 +33,7 @@ function setup()
 
 
 	canyon = {
-		x_pos: 100,
+		x_pos: 400,
 		width: 100
 	}
 }
@@ -45,12 +50,92 @@ function draw()
 	fill(0,155,0);
 	rect(0, floorPos_y, width, height - floorPos_y); 
 	
+	push();
+	translate(scrollPos, 0);
+
 	//Canyon
 	fill(100, 155, 255);
 	noStroke();
 	rect(canyon.x_pos, 429, canyon.width, 150);
 
+	
+	//Trees
+	
+	for (var i = 0; i < trees_x.length; i++){
+		noStroke();
+		fill(6, 102, 14);
+		ellipse(trees_x[i], treePos_y, 150, 200);
+		ellipse(trees_x[i] - (804 - 795), treePos_y -  (265 - 165), 60, 60);
+		ellipse(trees_x[i] - (804 -759), treePos_y - (265 - 188), 60, 60);
+		ellipse(trees_x[i] - (804 - 733), treePos_y - (265 - 218), 60, 60);
+		ellipse(trees_x[i] - (804 - 736), treePos_y - (265 - 270), 80, 80);
+		ellipse(trees_x[i] -  (804 - 760), treePos_y - (265 - 328), 60, 60);
+		ellipse(trees_x[i] - (804 - 840), treePos_y - (265 - 182), 60, 60);
+		ellipse(trees_x[i] - (804 - 864), treePos_y - (265 - 225), 70, 70);
+		ellipse(trees_x[i] - (804 - 871), treePos_y - (265 - 270), 80, 80);
+		ellipse(trees_x[i] - (804 - 840), treePos_y - (265 - 315), 80, 80);
+	
+		fill(99, 36, 5);
+		beginShape();
+		vertex(trees_x[i] - (804 - 780), treePos_y - (265 - 432));
+		vertex(trees_x[i] - (804 - 784), treePos_y - (265 - 423));
+		vertex(trees_x[i] - (804 - 790), treePos_y - (265 - 405));
+		vertex(trees_x[i] - (804 - 792), treePos_y - (265 - 331));
+		vertex(trees_x[i] - (804 - 770), treePos_y - (265 - 310));
+		vertex(trees_x[i] - (804 - 773), treePos_y - (265 - 306));
+		vertex(trees_x[i] - (804 - 794), treePos_y - (265 - 320));
+		vertex(trees_x[i] - (804 - 806), treePos_y - (265 - 301));
+		vertex(trees_x[i] - (804 - 800), treePos_y - (265 - 310));
+		vertex(trees_x[i] - (804 - 810), treePos_y - (265 - 300));
+		vertex(trees_x[i] - (804 - 810), treePos_y - (265 - 323));
+		vertex(trees_x[i] - (804 - 820), treePos_y - (265 - 313));
+		vertex(trees_x[i] - (804 - 829), treePos_y - (265 - 303));
+		vertex(trees_x[i] - (804 - 832), treePos_y - (265 - 306));
+		vertex(trees_x[i] - (804 - 820), treePos_y - (265 - 326));
+		vertex(trees_x[i] - (804 - 815), treePos_y - (265 - 333));
+		vertex(trees_x[i] - (804 - 812), treePos_y - (265 - 403));
+		vertex(trees_x[i] - (804 - 817), treePos_y - (265 - 421));
+		vertex(trees_x[i] - (804 - 822), treePos_y - (265 - 432));
+		endShape(CLOSE);
+		
+	
+	}
 
+
+	if (!collectable.isFound){
+		//Collectable
+	
+	
+	fill(252, 197, 18);
+	stroke(0);
+	strokeWeight(0);
+	ellipse(collectable.x_pos, collectable.y_pos, 35 * collectable.size, 35 * collectable.size);
+	noStroke();
+	
+	noFill();
+	strokeWeight(1);
+	stroke(0);
+	ellipse(collectable.x_pos - (434 - 434), collectable.y_pos - (397 - 397), 30 * collectable.size, 30 * collectable.size)
+
+	noStroke();
+	fill(255);
+	textSize(25*collectable.size);
+	text('B', collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406));
+
+	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
+	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
+	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
+	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
+
+	}
+
+
+	if (dist(collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406), gameChar_x - scrollPos, gameChar_y - 30) < 30){
+		collectable.isFound = true;
+	}
+
+
+	pop();
 
 
 
@@ -167,7 +252,12 @@ function draw()
 		strokeWeight(1); //To revert strokeWeight for the frames to the default value 
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 		
-		gameChar_x -= 4;
+		if (gameChar_x > 30){
+			gameChar_x -= 4;
+		}
+		else{
+			scrollPos += 4;
+		}
 
 	}
 	else if(isRight && isFalling)
@@ -270,7 +360,14 @@ function draw()
 	strokeWeight(1); //To revert strokeWeight for the frames to the default value 
 	rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
-	gameChar_x += 4;
+	if (gameChar_x < 994){
+		gameChar_x += 4;
+		}
+
+	else{
+		scrollPos -=4;
+	}
+
 
 	}
 	else if(isLeft)
@@ -331,8 +428,12 @@ function draw()
 		strokeWeight(1); //To revert strokeWeight for the frames to the default value 
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
-		gameChar_x -= 4;
-
+		if (gameChar_x > 30){
+			gameChar_x -= 4;
+		}
+		else{
+			scrollPos += 4;
+		}
 	}
 	else if(isRight)
 	{
@@ -392,7 +493,14 @@ function draw()
 		strokeWeight(1); //To revert strokeWeight for the frames to the default value 
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
+		if (gameChar_x < 994){
 		gameChar_x += 4;
+		}
+
+		else{
+			scrollPos -=4;
+		}
+
 
 	}
 	else if(isFalling || isPlummeting)
@@ -577,40 +685,9 @@ function draw()
 
 	}
 
-	if (!collectable.isFound){
-		//Collectable
-	
-	
-	fill(252, 197, 18);
-	stroke(0);
-	strokeWeight(0);
-	ellipse(collectable.x_pos, collectable.y_pos, 35 * collectable.size, 35 * collectable.size);
-	noStroke();
-	
-	noFill();
-	strokeWeight(1);
-	stroke(0);
-	ellipse(collectable.x_pos - (434 - 434), collectable.y_pos - (397 - 397), 30 * collectable.size, 30 * collectable.size)
-
-	noStroke();
-	fill(255);
-	textSize(25*collectable.size);
-	text('B', collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406));
-
-	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
-	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
-	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
-	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
-
-	}
 
 
-	if (dist(collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406), gameChar_x, gameChar_y - 30) < 30){
-		collectable.isFound = true;
-	}
-
-
-	if (gameChar_x > canyon.x_pos && gameChar_x < (canyon.x_pos + canyon.width)){
+	if (gameChar_x > canyon.x_pos + scrollPos && gameChar_x < (canyon.x_pos + canyon.width + scrollPos)){
 		isPlummeting = true;
 
 	}
