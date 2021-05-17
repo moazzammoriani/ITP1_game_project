@@ -3,15 +3,17 @@
 var gameChar_x;
 var gameChar_y;
 var floorPos_y;
-var trees_x, treePos_y;
+var trees_x, trees_y;
 var canyon;
 var isLeft, isRight, isJumping, isFalling, isPlummeting;
 var scrollPos;
+var betweenCanyon;
 function setup()
 {
+
 	createCanvas(1024, 576);
 	floorPos_y = height * 3/4;
-	gameChar_x = width/2;
+	gameChar_x = width/2 + 20;
 	gameChar_y = floorPos_y ;
 
 	isLeft = false;
@@ -20,22 +22,42 @@ function setup()
 	isPlummeting = false;
 	scrollPos = 0;
 
-	trees_x = [50, 300, 700];
-	treePos_y = floorPos_y - 167;
-
-	collectable = {
-		x_pos: 100,
-		y_pos: 400,
-		size: 1,
-		isFound: false
-
-	}
+	mountains = [
+		{x_pos: 50, y_pos: 82},
+		{x_pos: 800, y_pos: 82},
+		{x_pos: 1600, y_pos: 82},
+		{x_pos: 2400, y_pos: 82}
 
 
-	canyon = {
-		x_pos: 400,
-		width: 100
-	}
+
+	]
+
+	trees_x = [50, 300, 700, 1100];
+	trees_y = floorPos_y - 167;
+
+	clouds = [
+		{x_pos: 250, y_pos: 100},
+		{x_pos: 500, y_pos: 200},
+		{x_pos: 750, y_pos: 40},
+		{x_pos: 100, y_pos: 150}
+	]
+	collectables = [
+		{x_pos: 100, y_pos: 400, isFound: false},
+		{x_pos: 800, y_pos: 400, isFound: false},
+		{x_pos: 300, y_pos: 250, isFound: false},
+		{x_pos: 900, y_pos: 400, isFound: false}
+
+		
+	]
+
+
+	canyons = [
+		{x_pos: 400, width: 100},
+		{x_pos: 1215, width: 100},
+		{x_pos: 2000, width: 100},
+		{x_pos: 2684, width: 100}
+
+	]
 }
 
 function draw()
@@ -53,87 +75,134 @@ function draw()
 	push();
 	translate(scrollPos, 0);
 
-	//Canyon
-	fill(100, 155, 255);
-	noStroke();
-	rect(canyon.x_pos, 429, canyon.width, 150);
+	
 
+	//Clouds
+
+	for (var i = 0; i < clouds.length; i++){
+			fill(255);
 	
+			rect(clouds[i].x_pos, clouds[i].y_pos, 140, 30);
+		
+			ellipse(clouds[i].x_pos - (157 - 158), clouds[i].y_pos - (75 - 89), 30, 32);
+			ellipse(clouds[i].x_pos - (157 - 295), clouds[i].y_pos - (75 - 89), 30, 32);
+			ellipse(clouds[i].x_pos - (157 - 205), clouds[i].y_pos - (75 - 48), 50, 50);
+			ellipse(clouds[i].x_pos - (157 - 174), clouds[i].y_pos - (75 - 65), 40, 40);
+			ellipse(clouds[i].x_pos - (157 - 210), clouds[i].y_pos - (75 - 65), 45, 45);
+			ellipse(clouds[i].x_pos - (157 - 240), clouds[i].y_pos - (75 - 65), 50, 50);
+			ellipse(clouds[i].x_pos - (157 - 270), clouds[i].y_pos - (75 - 80), 40, 40);
+	}
+
+	//Mountains
+
+	for (var i = 0; i < mountains.length; i++){
+		
+
+		fill(46, 40, 40);
+		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 220, mountains[i].y_pos + 350, mountains[i].x_pos + 220, mountains[i].y_pos + 350);
+		fill(255);
+		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 32, mountains[i].y_pos + 50, mountains[i].x_pos + 32, mountains[i].y_pos + 50);
+
+		stroke(100, 155, 255);
+		strokeWeight(20);
+		line(mountains[i].x_pos, mountains[i].y_pos+ 2, mountains[i].x_pos - 8, mountains[i].y_pos + 5);
+		noStroke();
+	}
+
+
 	//Trees
-	
+
+		
+
 	for (var i = 0; i < trees_x.length; i++){
 		noStroke();
 		fill(6, 102, 14);
-		ellipse(trees_x[i], treePos_y, 150, 200);
-		ellipse(trees_x[i] - (804 - 795), treePos_y -  (265 - 165), 60, 60);
-		ellipse(trees_x[i] - (804 -759), treePos_y - (265 - 188), 60, 60);
-		ellipse(trees_x[i] - (804 - 733), treePos_y - (265 - 218), 60, 60);
-		ellipse(trees_x[i] - (804 - 736), treePos_y - (265 - 270), 80, 80);
-		ellipse(trees_x[i] -  (804 - 760), treePos_y - (265 - 328), 60, 60);
-		ellipse(trees_x[i] - (804 - 840), treePos_y - (265 - 182), 60, 60);
-		ellipse(trees_x[i] - (804 - 864), treePos_y - (265 - 225), 70, 70);
-		ellipse(trees_x[i] - (804 - 871), treePos_y - (265 - 270), 80, 80);
-		ellipse(trees_x[i] - (804 - 840), treePos_y - (265 - 315), 80, 80);
+		ellipse(trees_x[i], trees_y, 150, 200);
+		ellipse(trees_x[i] - (804 - 795), trees_y -  (265 - 165), 60, 60);
+		ellipse(trees_x[i] - (804 -759), trees_y - (265 - 188), 60, 60);
+		ellipse(trees_x[i] - (804 - 733), trees_y - (265 - 218), 60, 60);
+		ellipse(trees_x[i] - (804 - 736), trees_y - (265 - 270), 80, 80);
+		ellipse(trees_x[i] -  (804 - 760), trees_y - (265 - 328), 60, 60);
+		ellipse(trees_x[i] - (804 - 840), trees_y - (265 - 182), 60, 60);
+		ellipse(trees_x[i] - (804 - 864), trees_y - (265 - 225), 70, 70);
+		ellipse(trees_x[i] - (804 - 871), trees_y - (265 - 270), 80, 80);
+		ellipse(trees_x[i] - (804 - 840), trees_y - (265 - 315), 80, 80);
 	
 		fill(99, 36, 5);
 		beginShape();
-		vertex(trees_x[i] - (804 - 780), treePos_y - (265 - 432));
-		vertex(trees_x[i] - (804 - 784), treePos_y - (265 - 423));
-		vertex(trees_x[i] - (804 - 790), treePos_y - (265 - 405));
-		vertex(trees_x[i] - (804 - 792), treePos_y - (265 - 331));
-		vertex(trees_x[i] - (804 - 770), treePos_y - (265 - 310));
-		vertex(trees_x[i] - (804 - 773), treePos_y - (265 - 306));
-		vertex(trees_x[i] - (804 - 794), treePos_y - (265 - 320));
-		vertex(trees_x[i] - (804 - 806), treePos_y - (265 - 301));
-		vertex(trees_x[i] - (804 - 800), treePos_y - (265 - 310));
-		vertex(trees_x[i] - (804 - 810), treePos_y - (265 - 300));
-		vertex(trees_x[i] - (804 - 810), treePos_y - (265 - 323));
-		vertex(trees_x[i] - (804 - 820), treePos_y - (265 - 313));
-		vertex(trees_x[i] - (804 - 829), treePos_y - (265 - 303));
-		vertex(trees_x[i] - (804 - 832), treePos_y - (265 - 306));
-		vertex(trees_x[i] - (804 - 820), treePos_y - (265 - 326));
-		vertex(trees_x[i] - (804 - 815), treePos_y - (265 - 333));
-		vertex(trees_x[i] - (804 - 812), treePos_y - (265 - 403));
-		vertex(trees_x[i] - (804 - 817), treePos_y - (265 - 421));
-		vertex(trees_x[i] - (804 - 822), treePos_y - (265 - 432));
+		vertex(trees_x[i] - (804 - 780), trees_y - (265 - 432));
+		vertex(trees_x[i] - (804 - 784), trees_y - (265 - 423));
+		vertex(trees_x[i] - (804 - 790), trees_y - (265 - 405));
+		vertex(trees_x[i] - (804 - 792), trees_y - (265 - 331));
+		vertex(trees_x[i] - (804 - 770), trees_y - (265 - 310));
+		vertex(trees_x[i] - (804 - 773), trees_y - (265 - 306));
+		vertex(trees_x[i] - (804 - 794), trees_y - (265 - 320));
+		vertex(trees_x[i] - (804 - 806), trees_y - (265 - 301));
+		vertex(trees_x[i] - (804 - 800), trees_y - (265 - 310));
+		vertex(trees_x[i] - (804 - 810), trees_y - (265 - 300));
+		vertex(trees_x[i] - (804 - 810), trees_y - (265 - 323));
+		vertex(trees_x[i] - (804 - 820), trees_y - (265 - 313));
+		vertex(trees_x[i] - (804 - 829), trees_y - (265 - 303));
+		vertex(trees_x[i] - (804 - 832), trees_y - (265 - 306));
+		vertex(trees_x[i] - (804 - 820), trees_y - (265 - 326));
+		vertex(trees_x[i] - (804 - 815), trees_y - (265 - 333));
+		vertex(trees_x[i] - (804 - 812), trees_y - (265 - 403));
+		vertex(trees_x[i] - (804 - 817), trees_y - (265 - 421));
+		vertex(trees_x[i] - (804 - 822), trees_y - (265 - 432));
 		endShape(CLOSE);
+
+	}
+
+	//Canyons
+	for (var i = 0; i < canyons.length; i++){
+
+		fill(100, 155, 255);
+		noStroke();
+		rect(canyons[i].x_pos, 429, canyons[i].width, 150);
+		fill(100, 155, 255);
+
+	
+
+
+	}
+	
+
+	//Collectables
+	for (var i = 0; i < collectables.length; i++){
+
+		if (!collectables[i].isFound){
 		
+		
+			
+		fill(252, 197, 18);
+		stroke(0);
+		strokeWeight(0);
+		ellipse(collectables[i].x_pos, collectables[i].y_pos, 35, 35);
+		noStroke();
+		
+		noFill();
+		strokeWeight(1);
+		stroke(0);
+		ellipse(collectables[i].x_pos - (434 - 434), collectables[i].y_pos - (397 - 397), 30, 30)
+
+		noStroke();
+		fill(255);
+		textSize(25);
+		text('B', collectables[i].x_pos - (434 - 426.5), collectables[i].y_pos - (397 - 406));
+
+		rect(collectables[i].x_pos - (434 - 431), collectables[i].y_pos - (397 - 385), 2, 3);
+		rect(collectables[i].x_pos - (434 - 435), collectables[i].y_pos - (397 - 385), 2, 3);
+		rect(collectables[i].x_pos - (434 - 431), collectables[i].y_pos - (397 - 406), 2, 3);
+		rect(collectables[i].x_pos - (434 - 435), collectables[i].y_pos - (397 - 406), 2, 3);
+
+		}
+
+
+		if (dist(collectables[i].x_pos - (434 - 426.5), collectables[i].y_pos - (397 - 406), gameChar_x - scrollPos, gameChar_y - 30) < 30){
+		collectables[i].isFound = true;
+		}
 	
 	}
-
-
-	if (!collectable.isFound){
-		//Collectable
-	
-	
-	fill(252, 197, 18);
-	stroke(0);
-	strokeWeight(0);
-	ellipse(collectable.x_pos, collectable.y_pos, 35 * collectable.size, 35 * collectable.size);
-	noStroke();
-	
-	noFill();
-	strokeWeight(1);
-	stroke(0);
-	ellipse(collectable.x_pos - (434 - 434), collectable.y_pos - (397 - 397), 30 * collectable.size, 30 * collectable.size)
-
-	noStroke();
-	fill(255);
-	textSize(25*collectable.size);
-	text('B', collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406));
-
-	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
-	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 385), 2*collectable.size, 3*collectable.size);
-	rect(collectable.x_pos - (434 - 431), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
-	rect(collectable.x_pos - (434 - 435), collectable.y_pos - (397 - 406), 2*collectable.size, 3*collectable.size);
-
-	}
-
-
-	if (dist(collectable.x_pos - (434 - 426.5), collectable.y_pos - (397 - 406), gameChar_x - scrollPos, gameChar_y - 30) < 30){
-		collectable.isFound = true;
-	}
-
 
 	pop();
 
@@ -685,12 +754,19 @@ function draw()
 
 	}
 
-
-
-	if (gameChar_x > canyon.x_pos + scrollPos && gameChar_x < (canyon.x_pos + canyon.width + scrollPos)){
-		isPlummeting = true;
-
+	betweenCanyon = false;
+	for (var i = 0; i < canyons.length; i++){
+		if (gameChar_x - scrollPos > canyons[i].x_pos  && gameChar_x - scrollPos < (canyons[i].x_pos + canyons[i].width)){
+			betweenCanyon = true;
+	
+		}
+	
 	}
+
+	if (betweenCanyon) {
+		isPlummeting = true;
+	}
+
 
 	else{
 		isPlummeting = false;
