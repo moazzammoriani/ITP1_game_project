@@ -52,7 +52,7 @@ function setup() {
 }
 
 function draw() {
-	background(100,155,255); 
+	background(255,155,255); 
 
 	//Ground
 	noStroke();
@@ -63,76 +63,18 @@ function draw() {
 	translate(scrollPos, 0);
 
 	//Clouds
-	for (var i = 0; i < clouds.length; i++) {
-			fill(255);
-			rect(clouds[i].x_pos, clouds[i].y_pos, 140, 30);
-			ellipse(clouds[i].x_pos + 1, clouds[i].y_pos + 14, 30, 32);
-			ellipse(clouds[i].x_pos + 138, clouds[i].y_pos + 14, 30, 32);
-			ellipse(clouds[i].x_pos + 48, clouds[i].y_pos - 27, 50, 50);
-			ellipse(clouds[i].x_pos + 17, clouds[i].y_pos - 10, 40, 40);
-			ellipse(clouds[i].x_pos + 53, clouds[i].y_pos - 10, 45, 45);
-			ellipse(clouds[i].x_pos + 83, clouds[i].y_pos - 10, 50, 50);
-			ellipse(clouds[i].x_pos + 113, clouds[i].y_pos + 5, 40, 40);
-	}
+    drawClouds();
 
 	//Mountains
-	for (var i = 0; i < mountains.length; i++) {
-		fill(46, 40, 40);
-		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 220, mountains[i].y_pos + 350, mountains[i].x_pos + 220, mountains[i].y_pos + 350);
-		fill(255);
-		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 32, mountains[i].y_pos + 50, mountains[i].x_pos + 32, mountains[i].y_pos + 50);
-		stroke(100, 155, 255);
-		strokeWeight(20);
-		line(mountains[i].x_pos, mountains[i].y_pos+ 2, mountains[i].x_pos - 8, mountains[i].y_pos + 5);
-		noStroke();
-	}
-
-
+    drawMountains();
 	//Trees
-	for (var i = 0; i < trees_x.length; i++) {
-		noStroke();
-		fill(6, 102, 14);
-		ellipse(trees_x[i], trees_y, 150, 200);
-		ellipse(trees_x[i] - 9, trees_y -  100, 60, 60);
-		ellipse(trees_x[i] - 45, trees_y - 77, 60, 60);
-		ellipse(trees_x[i] - 71, trees_y - 47, 60, 60);
-		ellipse(trees_x[i] - 68, trees_y + 5, 80, 80);
-		ellipse(trees_x[i] - 44, trees_y + 63, 60, 60);
-		ellipse(trees_x[i] + 36, trees_y - 83, 60, 60);
-		ellipse(trees_x[i] + 60, trees_y - 40, 70, 70);
-		ellipse(trees_x[i] + 67, trees_y + 5,  80, 80);
-		ellipse(trees_x[i] + 36, trees_y + 50, 80, 80);
-		fill(99, 36, 5);
-		beginShape();
-		vertex(trees_x[i] - 24, trees_y + 167);
-		vertex(trees_x[i] - 20, trees_y + 158);
-		vertex(trees_x[i] - 14, trees_y + 140);
-		vertex(trees_x[i] - 12, trees_y + 66);
-		vertex(trees_x[i] - 34, trees_y + 45);
-		vertex(trees_x[i] - 31, trees_y + 41);
-		vertex(trees_x[i] - 10, trees_y + 55);
-		vertex(trees_x[i] + 2, trees_y + 36);
-		vertex(trees_x[i] - 4, trees_y + 45);
-		vertex(trees_x[i] + 6, trees_y + 35);
-		vertex(trees_x[i] + 6, trees_y + 58);
-		vertex(trees_x[i] + 16, trees_y + 48);
-		vertex(trees_x[i] + 25, trees_y + 38);
-		vertex(trees_x[i] + 28, trees_y + 41);
-		vertex(trees_x[i] + 16, trees_y + 58);
-		vertex(trees_x[i] + 11, trees_y + 68);
-		vertex(trees_x[i] + 8, trees_y + 138);
-		vertex(trees_x[i] + 13, trees_y + 156);
-		vertex(trees_x[i] + 18, trees_y + 167);
-		endShape(CLOSE);
-	}
-
+    drawTrees();
+        
 	//Canyons
 	for (var i = 0; i < canyons.length; i++) {
-		fill(100, 155, 255);
-		noStroke();
-		rect(canyons[i].x_pos, 429, canyons[i].width, 150);
-		fill(100, 155, 255);
+        drawCanyon(canyons[i]);
 	}
+    
 	
 
 	//Collectables
@@ -165,6 +107,57 @@ function draw() {
 
 	pop();
 
+
+    drawGameChar();
+
+	//The remaining code below in the draw function enables the canyon interaction 
+	betweenCanyon = false; 
+
+	for (var i = 0; i < canyons.length; i++) { 
+		if (gameChar_x - scrollPos > canyons[i].x_pos  && gameChar_x - scrollPos < (canyons[i].x_pos + canyons[i].width)){
+			betweenCanyon = true;
+		}
+	}
+
+	if (betweenCanyon) {
+		isPlummeting = true;
+	}
+
+	else {
+		isPlummeting = false;
+	}
+}
+
+//The code below deals with user-input interaction
+function keyPressed() {
+	if (keyCode ==  37) {
+		isLeft = true;
+	}
+
+	else if (keyCode == 32) {
+		isJumping = true;
+	}
+
+	else if (keyCode == 39) {
+		isRight = true;
+	}
+}
+
+function keyReleased() {
+	if (keyCode ==  37) {
+		isLeft = false;
+	}
+
+	else if (keyCode == 32) {
+		isJumping = false;
+	}
+
+	else if (keyCode == 39) {
+		isRight = false;
+	}
+}
+
+function drawGameChar() {
 	if (gameChar_y < floorPos_y + 18) { //Detects if character is mid-air 
 		isFalling = true;
 	}
@@ -172,7 +165,7 @@ function draw() {
 	else { //Detects if the character is on the ground
 		isFalling = false;
 	}
-		
+
 	if (isLeft && isFalling) { //Draws the game character when it is falling and facing left
 		//head
 		rectMode(CENTER);
@@ -583,7 +576,7 @@ function draw() {
 		strokeWeight(1); //To revert strokeWeight for the frames to the default value 
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 	}
-
+        
 	if (isJumping && gameChar_y > 300) { //Jumping-action implementation
 		gameChar_y -= 10;
 	}
@@ -591,50 +584,77 @@ function draw() {
 	if (isFalling || isPlummeting) { //Gravity implementation
 		gameChar_y += 5;
 	}
+}
 
-	//The remaining code below in the draw function enables the canyon interaction 
-	betweenCanyon = false; 
-
-	for (var i = 0; i < canyons.length; i++) { 
-		if (gameChar_x - scrollPos > canyons[i].x_pos  && gameChar_x - scrollPos < (canyons[i].x_pos + canyons[i].width)){
-			betweenCanyon = true;
-		}
-	}
-
-	if (betweenCanyon) {
-		isPlummeting = true;
-	}
-
-	else {
-		isPlummeting = false;
+function drawClouds() {
+	for (var i = 0; i < clouds.length; i++) {
+			fill(255);
+			rect(clouds[i].x_pos, clouds[i].y_pos, 140, 30);
+			ellipse(clouds[i].x_pos + 1, clouds[i].y_pos + 14, 30, 32);
+			ellipse(clouds[i].x_pos + 138, clouds[i].y_pos + 14, 30, 32);
+			ellipse(clouds[i].x_pos + 48, clouds[i].y_pos - 27, 50, 50);
+			ellipse(clouds[i].x_pos + 17, clouds[i].y_pos - 10, 40, 40);
+			ellipse(clouds[i].x_pos + 53, clouds[i].y_pos - 10, 45, 45);
+			ellipse(clouds[i].x_pos + 83, clouds[i].y_pos - 10, 50, 50);
+			ellipse(clouds[i].x_pos + 113, clouds[i].y_pos + 5, 40, 40);
 	}
 }
 
-//The code below deals with user-input interaction
-function keyPressed() {
-	if (keyCode ==  37) {
-		isLeft = true;
-	}
-
-	else if (keyCode == 32) {
-		isJumping = true;
-	}
-
-	else if (keyCode == 39) {
-		isRight = true;
+function drawMountains() {
+	for (var i = 0; i < mountains.length; i++) {
+		fill(46, 40, 40);
+		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 220, mountains[i].y_pos + 350, mountains[i].x_pos + 220, mountains[i].y_pos + 350);
+		fill(255);
+		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 32, mountains[i].y_pos + 50, mountains[i].x_pos + 32, mountains[i].y_pos + 50);
+		stroke(100, 155, 255);
+		strokeWeight(20);
+		line(mountains[i].x_pos, mountains[i].y_pos+ 2, mountains[i].x_pos - 8, mountains[i].y_pos + 5);
+		noStroke();
 	}
 }
 
-function keyReleased() {
-	if (keyCode ==  37) {
-		isLeft = false;
+function drawTrees() {
+	for (var i = 0; i < trees_x.length; i++) {
+		noStroke();
+		fill(6, 102, 14);
+		ellipse(trees_x[i], trees_y, 150, 200);
+		ellipse(trees_x[i] - 9, trees_y -  100, 60, 60);
+		ellipse(trees_x[i] - 45, trees_y - 77, 60, 60);
+		ellipse(trees_x[i] - 71, trees_y - 47, 60, 60);
+		ellipse(trees_x[i] - 68, trees_y + 5, 80, 80);
+		ellipse(trees_x[i] - 44, trees_y + 63, 60, 60);
+		ellipse(trees_x[i] + 36, trees_y - 83, 60, 60);
+		ellipse(trees_x[i] + 60, trees_y - 40, 70, 70);
+		ellipse(trees_x[i] + 67, trees_y + 5,  80, 80);
+		ellipse(trees_x[i] + 36, trees_y + 50, 80, 80);
+		fill(99, 36, 5);
+		beginShape();
+		vertex(trees_x[i] - 24, trees_y + 167);
+		vertex(trees_x[i] - 20, trees_y + 158);
+		vertex(trees_x[i] - 14, trees_y + 140);
+		vertex(trees_x[i] - 12, trees_y + 66);
+		vertex(trees_x[i] - 34, trees_y + 45);
+		vertex(trees_x[i] - 31, trees_y + 41);
+		vertex(trees_x[i] - 10, trees_y + 55);
+		vertex(trees_x[i] + 2, trees_y + 36);
+		vertex(trees_x[i] - 4, trees_y + 45);
+		vertex(trees_x[i] + 6, trees_y + 35);
+		vertex(trees_x[i] + 6, trees_y + 58);
+		vertex(trees_x[i] + 16, trees_y + 48);
+		vertex(trees_x[i] + 25, trees_y + 38);
+		vertex(trees_x[i] + 28, trees_y + 41);
+		vertex(trees_x[i] + 16, trees_y + 58);
+		vertex(trees_x[i] + 11, trees_y + 68);
+		vertex(trees_x[i] + 8, trees_y + 138);
+		vertex(trees_x[i] + 13, trees_y + 156);
+		vertex(trees_x[i] + 18, trees_y + 167);
+		endShape(CLOSE);
 	}
+}
 
-	else if (keyCode == 32) {
-		isJumping = false;
-	}
-
-	else if (keyCode == 39) {
-		isRight = false;
-	}
+function drawCanyon(t_canyon) {
+    fill(100, 155, 255);
+    noStroke();
+    rect(t_canyon.x_pos, 429, t_canyon.width, 150);
+    fill(100, 155, 255);
 }
