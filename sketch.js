@@ -1,4 +1,5 @@
 var gameChar_x;
+var gameChar_world_x;
 var gameChar_y;
 var floorPos_y;
 var trees_x, trees_y;
@@ -52,7 +53,9 @@ function setup() {
 }
 
 function draw() {
+    gameChar_world_x = gameChar_x - scrollPos;
 	background(255,155,255); 
+	betweenCanyon = false; 
 
 	//Ground
 	noStroke();
@@ -73,59 +76,38 @@ function draw() {
 	//Canyons
 	for (var i = 0; i < canyons.length; i++) {
         drawCanyon(canyons[i]);
+        checkCanyon(canyons[i]);
 	}
     
 	
 
 	//Collectables
 	for (var i = 0; i < collectables.length; i++) {
-		if (!collectables[i].isFound){
-		fill(252, 197, 18);
-		stroke(0);
-		strokeWeight(0);
-		ellipse(collectables[i].x_pos, collectables[i].y_pos, 35, 35);
-		noStroke();
-		noFill();
-		strokeWeight(1);
-		stroke(0);
-		ellipse(collectables[i].x_pos, collectables[i].y_pos, 30, 30)
-		noStroke();
-		fill(255);
-		textSize(25);
-		text('B', collectables[i].x_pos - 7.5, collectables[i].y_pos - (397 - 406));
-		rect(collectables[i].x_pos - 3, collectables[i].y_pos - 12, 2, 3);
-		rect(collectables[i].x_pos + 1, collectables[i].y_pos - 12, 2, 3);
-		rect(collectables[i].x_pos - 3, collectables[i].y_pos - 11, 2, 3);
-		rect(collectables[i].x_pos + 1, collectables[i].y_pos - 11, 2, 3);
-		}
-
-		if (dist(collectables[i].x_pos - 7.5, collectables[i].y_pos + 9, gameChar_x - scrollPos,
-			gameChar_y - 30) < 30) {
-			collectables[i].isFound = true;
-		}
+        drawCollectable(collectables[i]);
+        checkCollectable(collectables[i]);
 	}
 
 	pop();
 
+	if (gameChar_y < floorPos_y + 18) { //Detects if character is mid-air 
+		isFalling = true;
+	}
+
+	else { //Detects if the character is on the ground
+		isFalling = false;
+	}
 
     drawGameChar();
 
-	//The remaining code below in the draw function enables the canyon interaction 
-	betweenCanyon = false; 
-
-	for (var i = 0; i < canyons.length; i++) { 
-		if (gameChar_x - scrollPos > canyons[i].x_pos  && gameChar_x - scrollPos < (canyons[i].x_pos + canyons[i].width)){
-			betweenCanyon = true;
-		}
+	if (isJumping && gameChar_y > 300) { //Jumping-action implementation
+		gameChar_y -= 10;
 	}
 
-	if (betweenCanyon) {
-		isPlummeting = true;
+	if (isFalling || isPlummeting) { //Gravity implementation
+		gameChar_y += 5;
 	}
 
-	else {
-		isPlummeting = false;
-	}
+
 }
 
 //The code below deals with user-input interaction
@@ -158,13 +140,6 @@ function keyReleased() {
 }
 
 function drawGameChar() {
-	if (gameChar_y < floorPos_y + 18) { //Detects if character is mid-air 
-		isFalling = true;
-	}
-
-	else { //Detects if the character is on the ground
-		isFalling = false;
-	}
 
 	if (isLeft && isFalling) { //Draws the game character when it is falling and facing left
 		//head
@@ -442,7 +417,7 @@ function drawGameChar() {
 		}
 
 		else {
-			scrollPos -=4;
+			scrollPos -= 4;
 		}
 	}
 
@@ -577,13 +552,6 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 	}
         
-	if (isJumping && gameChar_y > 300) { //Jumping-action implementation
-		gameChar_y -= 10;
-	}
-
-	if (isFalling || isPlummeting) { //Gravity implementation
-		gameChar_y += 5;
-	}
 }
 
 function drawClouds() {
@@ -606,7 +574,7 @@ function drawMountains() {
 		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 220, mountains[i].y_pos + 350, mountains[i].x_pos + 220, mountains[i].y_pos + 350);
 		fill(255);
 		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 32, mountains[i].y_pos + 50, mountains[i].x_pos + 32, mountains[i].y_pos + 50);
-		stroke(100, 155, 255);
+		stroke(255,155,255);
 		strokeWeight(20);
 		line(mountains[i].x_pos, mountains[i].y_pos+ 2, mountains[i].x_pos - 8, mountains[i].y_pos + 5);
 		noStroke();
@@ -657,4 +625,47 @@ function drawCanyon(t_canyon) {
     noStroke();
     rect(t_canyon.x_pos, 429, t_canyon.width, 150);
     fill(100, 155, 255);
+}
+
+function checkCanyon(t_canyon) {
+    if (gameChar_world_x > t_canyon.x_pos  && gameChar_world_x < (t_canyon.x_pos + t_canyon.width)) {
+        betweenCanyon = true;
+    }
+
+	if (betweenCanyon) {
+		isPlummeting = true;
+	}
+
+	else {
+		isPlummeting = false;
+	}
+}
+
+function drawCollectable(t_collectable) {
+		if (!t_collectable.isFound) {
+            fill(252, 197, 18);
+            stroke(0);
+            strokeWeight(0);
+            ellipse(t_collectable.x_pos, t_collectable.y_pos, 35, 35);
+            noStroke();
+            noFill();
+            strokeWeight(1);
+            stroke(0);
+            ellipse(t_collectable.x_pos, t_collectable.y_pos, 30, 30)
+            noStroke();
+            fill(255);
+            textSize(25);
+            text('B', t_collectable.x_pos - 7.5, t_collectable.y_pos - (397 - 406));
+            rect(t_collectable.x_pos - 3, t_collectable.y_pos - 12, 2, 3);
+            rect(t_collectable.x_pos + 1, t_collectable.y_pos - 12, 2, 3);
+            rect(t_collectable.x_pos - 3, t_collectable.y_pos - 11, 2, 3);
+            rect(t_collectable.x_pos + 1, t_collectable.y_pos - 11, 2, 3);
+		}
+}
+
+function checkCollectable(t_collectable) {
+    if (dist(t_collectable.x_pos - 7.5, t_collectable.y_pos + 9, gameChar_world_x,
+        gameChar_y - 30) < 30) {
+        t_collectable.isFound = true;
+    }
 }
