@@ -1,3 +1,5 @@
+var lives
+var game_score
 var gameChar_x;
 var gameChar_world_x;
 var gameChar_y;
@@ -10,52 +12,18 @@ var betweenCanyon;
 
 function setup() {
 	createCanvas(1024, 576);
+    lives = 3;
 	floorPos_y = height * 3/4;
-	gameChar_x = width/2 + 20;
-	gameChar_y = floorPos_y ;
-
-	isLeft = false;
-	isRight = false;
-	isFalling = false;
-	isPlummeting = false;
-	scrollPos = 0;
-
-	mountains = [
-		{x_pos: 50, y_pos: 82},
-		{x_pos: 800, y_pos: 82},
-		{x_pos: 1600, y_pos: 82},
-		{x_pos: 2400, y_pos: 82}
-	]
-
-	trees_x = [50, 300, 700, 1100];
-	trees_y = floorPos_y - 167;
-
-	clouds = [
-		{x_pos: 250, y_pos: 100},
-		{x_pos: 500, y_pos: 200},
-		{x_pos: 750, y_pos: 40},
-		{x_pos: 100, y_pos: 150}
-	]
-
-	collectables = [
-		{x_pos: 100, y_pos: 400, isFound: false},
-		{x_pos: 800, y_pos: 400, isFound: false},
-		{x_pos: 300, y_pos: 250, isFound: false},
-		{x_pos: 900, y_pos: 400, isFound: false}
-	]
-
-	canyons = [
-		{x_pos: 400, width: 100},
-		{x_pos: 1215, width: 100},
-		{x_pos: 2000, width: 100},
-		{x_pos: 2684, width: 100}
-	]
+    lifeToken_x = [50, 75, 100];
+    lifeToken_y = 110;
+    startGame();
 }
 
 function draw() {
     gameChar_world_x = gameChar_x - scrollPos;
 	background(255,155,255); 
 	betweenCanyon = false; 
+    checkPlayerDie();
 
 	//Ground
 	noStroke();
@@ -87,6 +55,9 @@ function draw() {
         checkCollectable(collectables[i]);
 	}
 
+    renderFlagpole();
+    checkFlagpole();
+
 	pop();
 
 	if (gameChar_y < floorPos_y + 18) { //Detects if character is mid-air 
@@ -107,6 +78,31 @@ function draw() {
 		gameChar_y += 5;
 	}
 
+    fill(255);
+    noStroke();
+    textSize(24);
+    text("Score: " + game_score, 30, 30);
+    for (let i = 0; i < lives; i++) {
+        drawLifeTokens();
+    }
+
+    if (lives < 1) {
+        textSize(40);
+        text("GAME OVER", 350, 320);
+        textSize(30);
+        text("Press space to continue", 350, 370);
+        return 
+
+    }
+
+    if (flagpole.isReached) {
+        textSize(40);
+        text("LEVEL COMPLETE", 350, 320);
+        textSize(30);
+        text("Press space to continue", 350, 370);
+        return
+
+    }
 
 }
 
@@ -140,7 +136,6 @@ function keyReleased() {
 }
 
 function drawGameChar() {
-
 	if (isLeft && isFalling) { //Draws the game character when it is falling and facing left
 		//head
 		rectMode(CENTER);
@@ -666,6 +661,113 @@ function drawCollectable(t_collectable) {
 function checkCollectable(t_collectable) {
     if (dist(t_collectable.x_pos - 7.5, t_collectable.y_pos + 9, gameChar_world_x,
         gameChar_y - 30) < 30) {
+        if (!t_collectable.isFound) game_score += 1;
         t_collectable.isFound = true;
+    }
+}
+
+function renderFlagpole() {
+    fill(120);
+    rect(flagpole.x_pos, 150, 10, 282);
+    fill(255,0,0);
+    rect(flagpole.x_pos + 10, flagpole.flag_height, 70, 50);
+
+    if (flagpole.isReached) {
+        if (flagpole.flag_height > 150) flagpole.flag_height -= 6
+    }
+}
+
+function checkFlagpole() {
+    if (abs(gameChar_world_x - flagpole.x_pos) < 20) flagpole.isReached = true;
+}
+
+function checkPlayerDie() {
+    if (gameChar_y > 576) {
+        lives -= 1;
+        lifeToken_x.pop();
+        startGame();
+    }
+}
+
+function startGame() {
+    game_score = 0;
+	gameChar_x = width/2 + 20;
+	gameChar_y = floorPos_y ;
+
+	isLeft = false;
+	isRight = false;
+	isFalling = false;
+	isPlummeting = false;
+	scrollPos = 0;
+
+	mountains = [
+		{x_pos: 50, y_pos: 82},
+		{x_pos: 800, y_pos: 82},
+		{x_pos: 1600, y_pos: 82},
+		{x_pos: 2400, y_pos: 82}
+	]
+
+	trees_x = [50, 300, 700, 1100];
+	trees_y = floorPos_y - 167;
+
+	clouds = [
+		{x_pos: 250, y_pos: 100},
+		{x_pos: 500, y_pos: 200},
+		{x_pos: 750, y_pos: 40},
+		{x_pos: 100, y_pos: 150}
+	]
+
+	collectables = [
+		{x_pos: 100, y_pos: 400, isFound: false},
+		{x_pos: 800, y_pos: 400, isFound: false},
+		{x_pos: 300, y_pos: 250, isFound: false},
+		{x_pos: 900, y_pos: 400, isFound: false}
+	]
+
+	canyons = [
+		{x_pos: 400, width: 100},
+		{x_pos: 1215, width: 100},
+		{x_pos: 2000, width: 100},
+		{x_pos: 2684, width: 100}
+	]
+
+    flagpole = {
+        x_pos: 900,
+        isReached: false,
+        flag_height:  360
+    }
+}
+
+function drawLifeTokens() {
+    for (let i = 0; i < lifeToken_x.length; i++) {
+        push();
+        scale(0.8)
+    //head
+        rectMode(CENTER);
+        strokeWeight(1);
+        stroke(0);
+        fill(220);
+        rect(lifeToken_x[i], lifeToken_y - 50, 20, 21, 50);
+    //eyes
+        fill(5);
+        rect(lifeToken_x[i], lifeToken_y - 51, 17, 6, 10);
+            //left
+        noStroke();
+        ellipseMode(CENTER);
+        fill(18, 30, 255);
+        ellipse(lifeToken_x[i] - 4, lifeToken_y - 50.5, 6, 6);
+        fill(255);	
+        ellipse(lifeToken_x[i] - 5.6, lifeToken_y - 51.5, 2, 2);
+            //right
+        noStroke();
+        ellipseMode(CENTER);
+        fill(18, 30, 255);
+        ellipse(lifeToken_x[i] + 5, lifeToken_y - 50.5, 6, 6);
+        fill(255);	
+        ellipse(lifeToken_x[i] + 3.6, lifeToken_y - 51.5, 2, 2);
+
+        strokeWeight(1); //To revert strokeWeight for the frames to the default value 
+        rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
+        pop();
     }
 }
