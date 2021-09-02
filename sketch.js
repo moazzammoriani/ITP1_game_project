@@ -91,7 +91,7 @@ function draw() {
         text("GAME OVER", 350, 320);
         textSize(30);
         text("Press space to continue", 350, 370);
-        return 
+        return;
 
     }
 
@@ -100,7 +100,7 @@ function draw() {
         text("LEVEL COMPLETE", 350, 320);
         textSize(30);
         text("Press space to continue", 350, 370);
-        return
+        return;
 
     }
 
