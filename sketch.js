@@ -3,12 +3,18 @@ var game_score
 var gameChar_x;
 var gameChar_world_x;
 var gameChar_y;
+var gameCharBottom_y;
+var gameCharTop_y;
+var gameCharLength;
 var floorPos_y;
 var trees_x, trees_y;
 var canyon;
 var isLeft, isRight, isJumping, isFalling, isPlummeting;
 var scrollPos;
 var betweenCanyon;
+var platforms;
+var onPlatform;
+var enemyContact;
 
 function setup() {
 	createCanvas(1024, 576);
@@ -29,6 +35,7 @@ function draw() {
 	noStroke();
 	fill(0,155,0);
 	rect(0, floorPos_y, width, height - floorPos_y); 
+
 	
 	push(); //Scrolling implementaton
 	translate(scrollPos, 0);
@@ -58,9 +65,18 @@ function draw() {
     renderFlagpole();
     checkFlagpole();
 
+    for (var i = 0; i < platforms.length; i++) {
+        platforms[i].draw();
+        platforms[i].checkIfOnTop();
+    }
+
+    for (var i = 0; i < Enemies.length; i++) {
+        Enemies[i].draw();
+    }
+
 	pop();
 
-	if (gameChar_y < floorPos_y + 18) { //Detects if character is mid-air 
+	if (gameChar_y < floorPos_y + 15 && !onPlatform) { //Detects if character is mid-air 
 		isFalling = true;
 	}
 
@@ -546,6 +562,8 @@ function drawGameChar() {
 		strokeWeight(1); //To revert strokeWeight for the frames to the default value 
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 	}
+    gameCharBottom_y = gameChar_y -14;
+    gameCharTop_y = gameCharBottom_y - 46;
         
 }
 
@@ -682,7 +700,7 @@ function checkFlagpole() {
 }
 
 function checkPlayerDie() {
-    if (gameChar_y > 576) {
+    if (gameChar_y > 576 || enemyContact) {
         lives -= 1;
         lifeToken_x.pop();
         startGame();
@@ -693,6 +711,9 @@ function startGame() {
     game_score = 0;
 	gameChar_x = width/2 + 20;
 	gameChar_y = floorPos_y ;
+    gameCharBottom_y = gameChar_y -14;
+    gameCharTop_y = gameCharBottom_y - 46;
+    gameCharLength = gameCharBottom_y - gameCharTop_y;
 
 	isLeft = false;
 	isRight = false;
@@ -736,6 +757,10 @@ function startGame() {
         isReached: false,
         flag_height:  360
     }
+
+    platforms = [createPlatform(50, floorPos_y - 70, 40)];
+
+    Enemies = [new Enemy(20, floorPos_y, 100, 1)] 
 }
 
 function drawLifeTokens() {
@@ -769,5 +794,59 @@ function drawLifeTokens() {
         strokeWeight(1); //To revert strokeWeight for the frames to the default value 
         rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
         pop();
+    }
+}
+
+function createPlatform(x, y, length) {
+    let plat = {
+        x : x,
+        y : y,
+        length: length,
+        draw: function() {
+            fill(255, 0, 255);
+            rect(this.x, this.y, this.length, 10);
+        },
+        checkIfOnTop: function() {
+            if (this.x < gameChar_world_x && gameChar_world_x < (this.x + this.length) && gameCharBottom_y < this.y && (this.y - gameCharLength-12) < gameCharTop_y) {
+                onPlatform = true;
+            } else {
+                onPlatform = false;
+            }
+        }
+    }
+
+    return plat;
+}
+
+function Enemy(x, y, movementRange, speed) {
+    this.x = x;
+    this.y = y;
+    this.movementRange = movementRange;
+    this.speed = speed;
+    this.currentX = x;
+
+    this.update = function() {
+        this.currentX += this.speed;
+        if (this.currentX > this.x + this.movementRange || this.currentX < this.x) {
+            this.speed = -this.speed;
+        }   
+    }
+
+    this.draw = function() {
+        this.update();
+        this.checkContact();
+        fill(255, 150, 0);
+        ellipse(this.currentX, this.y, 50);
+        stroke(0)
+        strokeWeight(1);
+        line(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24);
+
+    }
+
+    this.checkContact = function() {
+        if (dist(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24) < 40) {
+            enemyContact = true;
+            console.log("die");
+        }
     }
 }
