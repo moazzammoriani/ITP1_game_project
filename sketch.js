@@ -10,13 +10,22 @@ var isLeft, isRight, isJumping, isFalling, isPlummeting;
 var scrollPos;
 var betweenCanyon;
 
+function preload() {
+    soundFormats('mp3', 'wav');
+    backgroundMusic = loadSound('sounds/background-music.mp3');
+    backgroundMusic.setVolume(0.1);
+}
+
 function setup() {
+    jumpSound = loadSound('sounds/flame-sound.mp3');
+    jumpSound.setVolume(0.1);
 	createCanvas(1024, 576);
     lives = 3;
 	floorPos_y = height * 3/4;
     lifeToken_x = [50, 75, 100];
     lifeToken_y = 110;
     startGame();
+    backgroundMusic.loop();
 }
 
 function draw() {
@@ -114,6 +123,8 @@ function keyPressed() {
 
 	else if (keyCode == 32) {
 		isJumping = true;
+        jumpSound.play();
+        jumpSound.stop(0.5);
 	}
 
 	else if (keyCode == 39) {
