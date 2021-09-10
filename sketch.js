@@ -8,13 +8,26 @@ var gameCharTop_y;
 var gameCharLength;
 var floorPos_y;
 var trees_x, trees_y;
+var canyonImage;
 var canyon;
 var isLeft, isRight, isJumping, isFalling, isPlummeting;
 var scrollPos;
 var betweenCanyon;
+var platformImage;
 var platforms;
 var onPlatform;
 var enemyContact;
+var duck;
+var forwardDuck;
+var backwardDuck;
+
+
+function preload() {
+    canyonImage = loadImage("canyon.png");
+    platformImage = loadImage("platform.png");
+    forwardDuck = loadImage("forwardDuck.png");
+    backwardDuck = loadImage("backwardDuck.png");
+}
 
 function setup() {
 	createCanvas(1024, 576);
@@ -90,6 +103,10 @@ function draw() {
 		gameChar_y -= 10;
 	}
 
+    if (gameChar_y <= 300) {
+        isJumping = false;
+    }
+
 	if (isFalling || isPlummeting) { //Gravity implementation
 		gameChar_y += 5;
 	}
@@ -128,7 +145,7 @@ function keyPressed() {
 		isLeft = true;
 	}
 
-	else if (keyCode == 32) {
+	else if (keyCode == 32 && !isFalling && !isPlummeting) {
 		isJumping = true;
 	}
 
@@ -228,7 +245,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 		
 		//Conditional block used for scrolling implementation
-		if (gameChar_x > 30) {
+		if (gameChar_x > 300) {
 			gameChar_x -= 4;
 		}
 
@@ -313,7 +330,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
 		//Conditional block used for scrolling implementation
-		if (gameChar_x < 994) {
+		if (gameChar_x < 704) {
 			gameChar_x += 4;
 		}
 
@@ -370,7 +387,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
 		//Conditional block used for scrolling implementation
-		if (gameChar_x > 30) {
+		if (gameChar_x > 300) {
 			gameChar_x -= 4;
 		}
 
@@ -423,7 +440,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
 		//Conditional block used for scrolling implementation
-		if (gameChar_x < 994) {
+		if (gameChar_x < 704) {
 			gameChar_x += 4;
 		}
 
@@ -583,7 +600,7 @@ function drawClouds() {
 
 function drawMountains() {
 	for (var i = 0; i < mountains.length; i++) {
-		fill(46, 40, 40);
+		fill(90);
 		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 220, mountains[i].y_pos + 350, mountains[i].x_pos + 220, mountains[i].y_pos + 350);
 		fill(255);
 		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 32, mountains[i].y_pos + 50, mountains[i].x_pos + 32, mountains[i].y_pos + 50);
@@ -634,10 +651,7 @@ function drawTrees() {
 }
 
 function drawCanyon(t_canyon) {
-    fill(100, 155, 255);
-    noStroke();
-    rect(t_canyon.x_pos, 429, t_canyon.width, 150);
-    fill(100, 155, 255);
+    image(canyonImage, t_canyon.x_pos, 429, t_canyon.width, 150);
 }
 
 function checkCanyon(t_canyon) {
@@ -709,8 +723,8 @@ function checkPlayerDie() {
 
 function startGame() {
     game_score = 0;
-	gameChar_x = width/2 + 20;
-	gameChar_y = floorPos_y ;
+	gameChar_x = 72;
+	gameChar_y = floorPos_y;
     gameCharBottom_y = gameChar_y -14;
     gameCharTop_y = gameCharBottom_y - 46;
     gameCharLength = gameCharBottom_y - gameCharTop_y;
@@ -725,7 +739,7 @@ function startGame() {
 		{x_pos: 50, y_pos: 82},
 		{x_pos: 800, y_pos: 82},
 		{x_pos: 1600, y_pos: 82},
-		{x_pos: 2400, y_pos: 82}
+		{x_pos: 2400, y_pos: 82},
 	]
 
 	trees_x = [50, 300, 700, 1100];
@@ -753,14 +767,14 @@ function startGame() {
 	]
 
     flagpole = {
-        x_pos: 900,
+        x_pos: 8000,
         isReached: false,
         flag_height:  360
     }
 
-    platforms = [createPlatform(50, floorPos_y - 70, 40)];
+    platforms = [];
 
-    Enemies = [new Enemy(20, floorPos_y, 100, 1)] 
+    Enemies = []; 
 }
 
 function drawLifeTokens() {
@@ -802,12 +816,13 @@ function createPlatform(x, y, length) {
         x : x,
         y : y,
         length: length,
+        width: (57/174) * length,
         draw: function() {
             fill(255, 0, 255);
-            rect(this.x, this.y, this.length, 10);
+            image(platformImage, this.x, this.y, 174, 57);
         },
         checkIfOnTop: function() {
-            if (this.x < gameChar_world_x && gameChar_world_x < (this.x + this.length) && gameCharBottom_y < this.y && (this.y - gameCharLength-12) < gameCharTop_y) {
+            if (this.x < gameChar_world_x && gameChar_world_x < (this.x + this.length + 40) && gameCharBottom_y < this.y && (this.y - gameCharLength-12) < gameCharTop_y) {
                 onPlatform = true;
             } else {
                 onPlatform = false;
@@ -819,6 +834,7 @@ function createPlatform(x, y, length) {
 }
 
 function Enemy(x, y, movementRange, speed) {
+    duck = forwardDuck;
     this.x = x;
     this.y = y;
     this.movementRange = movementRange;
@@ -829,6 +845,11 @@ function Enemy(x, y, movementRange, speed) {
         this.currentX += this.speed;
         if (this.currentX > this.x + this.movementRange || this.currentX < this.x) {
             this.speed = -this.speed;
+            if (duck == forwardDuck) {
+                duck = backwardDuck;
+            } else {
+                duck = forwardDuck;
+            }
         }   
     }
 
@@ -836,17 +857,16 @@ function Enemy(x, y, movementRange, speed) {
         this.update();
         this.checkContact();
         fill(255, 150, 0);
-        ellipse(this.currentX, this.y, 50);
+        image(duck, this.currentX, this.y - 50, 60, 60);
         stroke(0)
         strokeWeight(1);
-        line(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24);
 
     }
 
     this.checkContact = function() {
+        // The 24 here is added because the center of the the game character's body is at gameCharTop_y + 24
         if (dist(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24) < 40) {
             enemyContact = true;
-            console.log("die");
         }
     }
 }
