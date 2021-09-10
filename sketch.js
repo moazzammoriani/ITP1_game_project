@@ -10,7 +10,10 @@ var floorPos_y;
 var trees_x, trees_y;
 var canyonImage;
 var canyon;
+var touchCanyonEdge;
+var inCanyon;
 var isLeft, isRight, isJumping, isFalling, isPlummeting;
+var jumpRange;
 var scrollPos;
 var betweenCanyon;
 var platformImage;
@@ -65,9 +68,12 @@ function draw() {
 	for (var i = 0; i < canyons.length; i++) {
         drawCanyon(canyons[i]);
         checkCanyon(canyons[i]);
+
+        if (inCanyon && (abs(canyons[i].x_pos - gameChar_world_x) < 10 || abs(canyons[i].x_pos + canyons[i].width - gameChar_world_x) < 10)) {
+            touchedCanyonEdge = true            
+        }
+
 	}
-    
-	
 
 	//Collectables
 	for (var i = 0; i < collectables.length; i++) {
@@ -99,7 +105,7 @@ function draw() {
 
     drawGameChar();
 
-	if (isJumping && gameChar_y > 300) { //Jumping-action implementation
+	if (isJumping && gameChar_y > jumpRange) { //Jumping-action implementation
 		gameChar_y -= 10;
 	}
 
@@ -141,15 +147,16 @@ function draw() {
 
 //The code below deals with user-input interaction
 function keyPressed() {
-	if (keyCode ==  37) {
+	if (keyCode ==  37 && !inCanyon) {
 		isLeft = true;
 	}
 
 	else if (keyCode == 32 && !isFalling && !isPlummeting) {
+        jumpRange = gameChar_y - 150;
 		isJumping = true;
 	}
 
-	else if (keyCode == 39) {
+	else if (keyCode == 39 && !inCanyon) {
 		isRight = true;
 	}
 }
@@ -662,10 +669,15 @@ function checkCanyon(t_canyon) {
 	if (betweenCanyon) {
 		isPlummeting = true;
 	}
-
 	else {
 		isPlummeting = false;
 	}
+
+    if (betweenCanyon && gameCharTop_y > 467) {
+        inCanyon = true; 
+    } else {
+        inCanyon = false;
+    }
 }
 
 function drawCollectable(t_collectable) {
@@ -714,7 +726,7 @@ function checkFlagpole() {
 }
 
 function checkPlayerDie() {
-    if (gameChar_y > 576 || enemyContact) {
+    if (gameChar_y > 576 || enemyContact || touchedCanyonEdge) {
         lives -= 1;
         lifeToken_x.pop();
         startGame();
@@ -733,6 +745,8 @@ function startGame() {
 	isRight = false;
 	isFalling = false;
 	isPlummeting = false;
+    touchedCanyonEdge = false;
+    jumpRange = gameChar_y - 150;
 	scrollPos = 0;
 
 	mountains = [
@@ -767,7 +781,7 @@ function startGame() {
 	]
 
     flagpole = {
-        x_pos: 8000,
+        x_pos: 3000,
         isReached: false,
         flag_height:  360
     }
@@ -829,7 +843,6 @@ function createPlatform(x, y, length) {
             }
         }
     }
-
     return plat;
 }
 
@@ -860,7 +873,6 @@ function Enemy(x, y, movementRange, speed) {
         image(duck, this.currentX, this.y - 50, 60, 60);
         stroke(0)
         strokeWeight(1);
-
     }
 
     this.checkContact = function() {
