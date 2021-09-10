@@ -3,12 +3,34 @@ var game_score
 var gameChar_x;
 var gameChar_world_x;
 var gameChar_y;
+var gameCharBottom_y;
+var gameCharTop_y;
+var gameCharLength;
 var floorPos_y;
 var trees_x, trees_y;
+var canyonImage;
 var canyon;
+var touchCanyonEdge;
+var inCanyon;
 var isLeft, isRight, isJumping, isFalling, isPlummeting;
+var jumpRange;
 var scrollPos;
 var betweenCanyon;
+var platformImage;
+var platforms;
+var onPlatform;
+var enemyContact;
+var duck;
+var forwardDuck;
+var backwardDuck;
+
+
+function preload() {
+    canyonImage = loadImage("canyon.png");
+    platformImage = loadImage("platform.png");
+    forwardDuck = loadImage("forwardDuck.png");
+    backwardDuck = loadImage("backwardDuck.png");
+}
 
 function preload() {
     soundFormats('mp3', 'wav');
@@ -38,6 +60,7 @@ function draw() {
 	noStroke();
 	fill(0,155,0);
 	rect(0, floorPos_y, width, height - floorPos_y); 
+
 	
 	push(); //Scrolling implementaton
 	translate(scrollPos, 0);
@@ -54,9 +77,12 @@ function draw() {
 	for (var i = 0; i < canyons.length; i++) {
         drawCanyon(canyons[i]);
         checkCanyon(canyons[i]);
+
+        if (inCanyon && (abs(canyons[i].x_pos - gameChar_world_x) < 10 || abs(canyons[i].x_pos + canyons[i].width - gameChar_world_x) < 10)) {
+            touchedCanyonEdge = true            
+        }
+
 	}
-    
-	
 
 	//Collectables
 	for (var i = 0; i < collectables.length; i++) {
@@ -67,9 +93,18 @@ function draw() {
     renderFlagpole();
     checkFlagpole();
 
+    for (var i = 0; i < platforms.length; i++) {
+        platforms[i].draw();
+        platforms[i].checkIfOnTop();
+    }
+
+    for (var i = 0; i < Enemies.length; i++) {
+        Enemies[i].draw();
+    }
+
 	pop();
 
-	if (gameChar_y < floorPos_y + 18) { //Detects if character is mid-air 
+	if (gameChar_y < floorPos_y + 15 && !onPlatform) { //Detects if character is mid-air 
 		isFalling = true;
 	}
 
@@ -79,9 +114,13 @@ function draw() {
 
     drawGameChar();
 
-	if (isJumping && gameChar_y > 300) { //Jumping-action implementation
+	if (isJumping && gameChar_y > jumpRange) { //Jumping-action implementation
 		gameChar_y -= 10;
 	}
+
+    if (gameChar_y <= 300) {
+        isJumping = false;
+    }
 
 	if (isFalling || isPlummeting) { //Gravity implementation
 		gameChar_y += 5;
@@ -117,17 +156,18 @@ function draw() {
 
 //The code below deals with user-input interaction
 function keyPressed() {
-	if (keyCode ==  37) {
+	if (keyCode ==  37 && !inCanyon) {
 		isLeft = true;
 	}
 
-	else if (keyCode == 32) {
+	else if (keyCode == 32 && !isFalling && !isPlummeting) {
+        jumpRange = gameChar_y - 150;
 		isJumping = true;
         jumpSound.play();
         jumpSound.stop(0.5);
 	}
 
-	else if (keyCode == 39) {
+	else if (keyCode == 39 && !inCanyon) {
 		isRight = true;
 	}
 }
@@ -223,7 +263,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 		
 		//Conditional block used for scrolling implementation
-		if (gameChar_x > 30) {
+		if (gameChar_x > 300) {
 			gameChar_x -= 4;
 		}
 
@@ -308,7 +348,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
 		//Conditional block used for scrolling implementation
-		if (gameChar_x < 994) {
+		if (gameChar_x < 704) {
 			gameChar_x += 4;
 		}
 
@@ -365,7 +405,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
 		//Conditional block used for scrolling implementation
-		if (gameChar_x > 30) {
+		if (gameChar_x > 300) {
 			gameChar_x -= 4;
 		}
 
@@ -418,7 +458,7 @@ function drawGameChar() {
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 
 		//Conditional block used for scrolling implementation
-		if (gameChar_x < 994) {
+		if (gameChar_x < 704) {
 			gameChar_x += 4;
 		}
 
@@ -557,6 +597,8 @@ function drawGameChar() {
 		strokeWeight(1); //To revert strokeWeight for the frames to the default value 
 		rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
 	}
+    gameCharBottom_y = gameChar_y -14;
+    gameCharTop_y = gameCharBottom_y - 46;
         
 }
 
@@ -576,7 +618,7 @@ function drawClouds() {
 
 function drawMountains() {
 	for (var i = 0; i < mountains.length; i++) {
-		fill(46, 40, 40);
+		fill(90);
 		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 220, mountains[i].y_pos + 350, mountains[i].x_pos + 220, mountains[i].y_pos + 350);
 		fill(255);
 		triangle(mountains[i].x_pos, mountains[i].y_pos, mountains[i].x_pos - 32, mountains[i].y_pos + 50, mountains[i].x_pos + 32, mountains[i].y_pos + 50);
@@ -627,10 +669,7 @@ function drawTrees() {
 }
 
 function drawCanyon(t_canyon) {
-    fill(100, 155, 255);
-    noStroke();
-    rect(t_canyon.x_pos, 429, t_canyon.width, 150);
-    fill(100, 155, 255);
+    image(canyonImage, t_canyon.x_pos, 429, t_canyon.width, 150);
 }
 
 function checkCanyon(t_canyon) {
@@ -641,10 +680,15 @@ function checkCanyon(t_canyon) {
 	if (betweenCanyon) {
 		isPlummeting = true;
 	}
-
 	else {
 		isPlummeting = false;
 	}
+
+    if (betweenCanyon && gameCharTop_y > 467) {
+        inCanyon = true; 
+    } else {
+        inCanyon = false;
+    }
 }
 
 function drawCollectable(t_collectable) {
@@ -693,7 +737,7 @@ function checkFlagpole() {
 }
 
 function checkPlayerDie() {
-    if (gameChar_y > 576) {
+    if (gameChar_y > 576 || enemyContact || touchedCanyonEdge) {
         lives -= 1;
         lifeToken_x.pop();
         startGame();
@@ -702,20 +746,25 @@ function checkPlayerDie() {
 
 function startGame() {
     game_score = 0;
-	gameChar_x = width/2 + 20;
-	gameChar_y = floorPos_y ;
+	gameChar_x = 72;
+	gameChar_y = floorPos_y;
+    gameCharBottom_y = gameChar_y -14;
+    gameCharTop_y = gameCharBottom_y - 46;
+    gameCharLength = gameCharBottom_y - gameCharTop_y;
 
 	isLeft = false;
 	isRight = false;
 	isFalling = false;
 	isPlummeting = false;
+    touchedCanyonEdge = false;
+    jumpRange = gameChar_y - 150;
 	scrollPos = 0;
 
 	mountains = [
 		{x_pos: 50, y_pos: 82},
 		{x_pos: 800, y_pos: 82},
 		{x_pos: 1600, y_pos: 82},
-		{x_pos: 2400, y_pos: 82}
+		{x_pos: 2400, y_pos: 82},
 	]
 
 	trees_x = [50, 300, 700, 1100];
@@ -743,10 +792,14 @@ function startGame() {
 	]
 
     flagpole = {
-        x_pos: 900,
+        x_pos: 3000,
         isReached: false,
         flag_height:  360
     }
+
+    platforms = [];
+
+    Enemies = []; 
 }
 
 function drawLifeTokens() {
@@ -780,5 +833,63 @@ function drawLifeTokens() {
         strokeWeight(1); //To revert strokeWeight for the frames to the default value 
         rectMode(CORNER); //To undo the change in rectMode I made for my character drawing purposes
         pop();
+    }
+}
+
+function createPlatform(x, y, length) {
+    let plat = {
+        x : x,
+        y : y,
+        length: length,
+        width: (57/174) * length,
+        draw: function() {
+            fill(255, 0, 255);
+            image(platformImage, this.x, this.y, 174, 57);
+        },
+        checkIfOnTop: function() {
+            if (this.x < gameChar_world_x && gameChar_world_x < (this.x + this.length + 40) && gameCharBottom_y < this.y && (this.y - gameCharLength-12) < gameCharTop_y) {
+                onPlatform = true;
+            } else {
+                onPlatform = false;
+            }
+        }
+    }
+    return plat;
+}
+
+function Enemy(x, y, movementRange, speed) {
+    duck = forwardDuck;
+    this.x = x;
+    this.y = y;
+    this.movementRange = movementRange;
+    this.speed = speed;
+    this.currentX = x;
+
+    this.update = function() {
+        this.currentX += this.speed;
+        if (this.currentX > this.x + this.movementRange || this.currentX < this.x) {
+            this.speed = -this.speed;
+            if (duck == forwardDuck) {
+                duck = backwardDuck;
+            } else {
+                duck = forwardDuck;
+            }
+        }   
+    }
+
+    this.draw = function() {
+        this.update();
+        this.checkContact();
+        fill(255, 150, 0);
+        image(duck, this.currentX, this.y - 50, 60, 60);
+        stroke(0)
+        strokeWeight(1);
+    }
+
+    this.checkContact = function() {
+        // The 24 here is added because the center of the the game character's body is at gameCharTop_y + 24
+        if (dist(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24) < 40) {
+            enemyContact = true;
+        }
     }
 }
