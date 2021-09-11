@@ -37,6 +37,8 @@ function preload() {
 }
 
 function setup() {
+    duckSound = loadSound('quack_sound_effect.mp3');
+    duckSound.setVolume(0.1);
     jumpSound = loadSound('sounds/flame-sound.mp3');
     jumpSound.setVolume(0.1);
 	createCanvas(1024, 576);
@@ -797,7 +799,7 @@ function startGame() {
 
     platforms = [createPlatform(100, 300, 150)];
 
-    Enemies = []; 
+    Enemies = [new Enemy(640, floorPos_y, 100, 1)]; 
 }
 
 function drawLifeTokens() {
@@ -886,8 +888,9 @@ function Enemy(x, y, movementRange, speed) {
 
     this.checkContact = function() {
         // The 24 here is added because the center of the the game character's body is at gameCharTop_y + 24
-        if (dist(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24) < 40) {
+        if (dist(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24) < 30) {
             enemyContact = true;
+            duckSound.play();
         }
     }
 }
