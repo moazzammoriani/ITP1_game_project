@@ -39,6 +39,8 @@ function preload() {
 }
 
 function setup() {
+    victorySound = loadSound('victory.wav');
+    victorySound.setVolume(0.1);
     fallingSound = loadSound('falling.wav');
     fallingSound.setVolume(0.1);
     coinSound = loadSound('coin.wav');
@@ -151,12 +153,15 @@ function draw() {
     }
 
     if (flagpole.isReached) {
-        textSize(40);
-        text("LEVEL COMPLETE", 350, 320);
-        textSize(30);
-        text("Press space to continue", 350, 370);
-        return;
-
+        if (flagpole.flag_height <= 150) {
+            textSize(40);
+            text("LEVEL COMPLETE", 350, 320);
+            textSize(30);
+            text("Press space to continue", 350, 370);
+            noLoop();
+            backgroundMusic.stop();
+            victorySound.play();
+        }
     }
 
 }
