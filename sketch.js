@@ -21,6 +21,8 @@ var platforms;
 var onPlatform;
 var enemyContact;
 var duck;
+var quackSound;
+var coinSound;
 var forwardDuck;
 var backwardDuck;
 
@@ -37,8 +39,10 @@ function preload() {
 }
 
 function setup() {
-    duckSound = loadSound('quack_sound_effect.mp3');
-    duckSound.setVolume(0.1);
+    coinSound = loadSound('coin.wav');
+    coinSound.setVolume(0.1);
+    quackSound = loadSound('quack_sound_effect.mp3');
+    quackSound.setVolume(0.1);
     jumpSound = loadSound('sounds/flame-sound.mp3');
     jumpSound.setVolume(0.1);
 	createCanvas(1024, 576);
@@ -716,8 +720,10 @@ function drawCollectable(t_collectable) {
 function checkCollectable(t_collectable) {
     if (dist(t_collectable.x_pos - 7.5, t_collectable.y_pos + 9, gameChar_world_x,
         gameChar_y - 30) < 30) {
-        if (!t_collectable.isFound) game_score += 1;
-        t_collectable.isFound = true;
+        if (!t_collectable.isFound) {game_score += 1;
+            coinSound.play();
+            t_collectable.isFound = true;
+        }
     }
 }
 
@@ -740,13 +746,14 @@ function checkPlayerDie() {
     if (gameChar_y > 576 || enemyContact || touchedCanyonEdge) {
         lives -= 1;
         lifeToken_x.pop();
+        enemyContact = false;
         startGame();
     }
 }
 
 function startGame() {
     game_score = 0;
-	gameChar_x = 72;
+	gameChar_x = 152;
 	gameChar_y = floorPos_y;
     gameCharBottom_y = gameChar_y -14;
     gameCharTop_y = gameCharBottom_y - 46;
@@ -888,9 +895,9 @@ function Enemy(x, y, movementRange, speed) {
 
     this.checkContact = function() {
         // The 24 here is added because the center of the the game character's body is at gameCharTop_y + 24
-        if (dist(this.currentX, this.y, gameChar_world_x, gameCharTop_y+24) < 30) {
+        if (dist(this.currentX + 33, this.y, gameChar_world_x, gameCharTop_y+24) < 33) {
             enemyContact = true;
-            duckSound.play();
+            quackSound.play();
         }
     }
 }
