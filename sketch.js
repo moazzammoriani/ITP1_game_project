@@ -30,9 +30,7 @@ function preload() {
     platformImage = loadImage("platform.png");
     forwardDuck = loadImage("forwardDuck.png");
     backwardDuck = loadImage("backwardDuck.png");
-}
 
-function preload() {
     soundFormats('mp3', 'wav');
     backgroundMusic = loadSound('sounds/background-music.mp3');
     backgroundMusic.setVolume(0.1);
@@ -118,7 +116,7 @@ function draw() {
 		gameChar_y -= 10;
 	}
 
-    if (gameChar_y <= 300) {
+    if (gameChar_y <= jumpRange) {
         isJumping = false;
     }
 
@@ -164,7 +162,7 @@ function keyPressed() {
         jumpRange = gameChar_y - 150;
 		isJumping = true;
         jumpSound.play();
-        jumpSound.stop(0.5);
+        jumpSound.stop(0.4);
 	}
 
 	else if (keyCode == 39 && !inCanyon) {
@@ -797,7 +795,7 @@ function startGame() {
         flag_height:  360
     }
 
-    platforms = [];
+    platforms = [createPlatform(100, 300, 150)];
 
     Enemies = []; 
 }
