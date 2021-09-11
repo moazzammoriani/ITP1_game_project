@@ -39,6 +39,8 @@ function preload() {
 }
 
 function setup() {
+    fallingSound = loadSound('falling.wav');
+    fallingSound.setVolume(0.1);
     coinSound = loadSound('coin.wav');
     coinSound.setVolume(0.1);
     quackSound = loadSound('quack_sound_effect.mp3');
@@ -83,7 +85,8 @@ function draw() {
         checkCanyon(canyons[i]);
 
         if (inCanyon && (abs(canyons[i].x_pos - gameChar_world_x) < 10 || abs(canyons[i].x_pos + canyons[i].width - gameChar_world_x) < 10)) {
-            touchedCanyonEdge = true            
+            touchedCanyonEdge = true; 
+            fallingSound.play();
         }
 
 	}
