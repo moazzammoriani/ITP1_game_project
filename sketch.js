@@ -19,12 +19,14 @@ var betweenCanyon;
 var platformImage;
 var platforms;
 var onPlatform;
+var abovePlatform;
 var enemyContact;
-var duck;
 var quackSound;
 var coinSound;
 var forwardDuck;
 var backwardDuck;
+var mountainArray;
+var canyonArray;
 
 
 function preload() {
@@ -35,25 +37,27 @@ function preload() {
 
     soundFormats('mp3', 'wav');
     backgroundMusic = loadSound('sounds/background-music.mp3');
-    backgroundMusic.setVolume(0.1);
+    backgroundMusic.setVolume(0.2);
 }
 
 function setup() {
     victorySound = loadSound('victory.wav');
-    victorySound.setVolume(0.1);
+    victorySound.setVolume(0.4);
     fallingSound = loadSound('falling.wav');
     fallingSound.setVolume(0.1);
     coinSound = loadSound('coin.wav');
     coinSound.setVolume(0.1);
     quackSound = loadSound('quack_sound_effect.mp3');
-    quackSound.setVolume(0.1);
+    quackSound.setVolume(0.3);
     jumpSound = loadSound('sounds/flame-sound.mp3');
-    jumpSound.setVolume(0.1);
+    jumpSound.setVolume(0.3);
 	createCanvas(1024, 576);
     lives = 3;
 	floorPos_y = height * 3/4;
     lifeToken_x = [50, 75, 100];
     lifeToken_y = 110;
+    mountainArray = [];
+    canyonArray = [];
     startGame();
     backgroundMusic.loop();
 }
@@ -86,7 +90,7 @@ function draw() {
         drawCanyon(canyons[i]);
         checkCanyon(canyons[i]);
 
-        if (inCanyon && (abs(canyons[i].x_pos - gameChar_world_x) < 10 || abs(canyons[i].x_pos + canyons[i].width - gameChar_world_x) < 10)) {
+        if (gameChar_y > 576 ||( inCanyon && (abs(canyons[i].x_pos - gameChar_world_x) < 10 || abs(canyons[i].x_pos + canyons[i].width - gameChar_world_x )) < 10)) {
             touchedCanyonEdge = true; 
             fallingSound.play();
         }
@@ -102,13 +106,31 @@ function draw() {
     renderFlagpole();
     checkFlagpole();
 
+    // Platforms
     for (var i = 0; i < platforms.length; i++) {
         platforms[i].draw();
-        platforms[i].checkIfOnTop();
     }
 
-    for (var i = 0; i < Enemies.length; i++) {
-        Enemies[i].draw();
+    // Check if above any platform 
+    for (var i = 0; i< platforms.length; i++) {
+        if (platforms[i].checkIfAbove()) {
+            abovePlatform = true;
+            break
+        }
+        abovePlatform = false;
+    }
+
+    //Check if on any platform
+    for (var i = 0; i < platforms.length; i++) {
+        if (platforms[i].checkIfOnTop()) {
+            onPlatform = true;
+            break;
+        }
+        onPlatform = false;
+    }
+
+    for (var i = 0; i < enemies.length; i++) {
+        enemies[i].draw();
     }
 
 	pop();
@@ -681,7 +703,7 @@ function drawTrees() {
 }
 
 function drawCanyon(t_canyon) {
-    image(canyonImage, t_canyon.x_pos, 429, t_canyon.width, 150);
+    image(canyonImage, t_canyon.x_pos, floorPos_y, t_canyon.width, 150);
 }
 
 function checkCanyon(t_canyon) {
@@ -689,14 +711,14 @@ function checkCanyon(t_canyon) {
         betweenCanyon = true;
     }
 
-	if (betweenCanyon) {
+	if (betweenCanyon && !abovePlatform) {
 		isPlummeting = true;
 	}
 	else {
 		isPlummeting = false;
 	}
 
-    if (betweenCanyon && gameCharTop_y > 467) {
+    if (betweenCanyon && gameCharBottom_y > 450) {
         inCanyon = true; 
     } else {
         inCanyon = false;
@@ -751,7 +773,7 @@ function checkFlagpole() {
 }
 
 function checkPlayerDie() {
-    if (gameChar_y > 576 || enemyContact || touchedCanyonEdge) {
+    if ( enemyContact || touchedCanyonEdge) {
         lives -= 1;
         lifeToken_x.pop();
         enemyContact = false;
@@ -776,45 +798,85 @@ function startGame() {
 	scrollPos = 0;
 
 	mountains = [
-		{x_pos: 50, y_pos: 82},
-		{x_pos: 800, y_pos: 82},
-		{x_pos: 1600, y_pos: 82},
-		{x_pos: 2400, y_pos: 82},
-	]
+        {x_pos: 901, y_pos: 82},
+        {x_pos: 2155, y_pos: 82},
+        {x_pos: 3837, y_pos: 82},
+    ]
 
-	trees_x = [50, 300, 700, 1100];
+    for (let i = 0; i < mountainArray.length; i++) {
+        mountains.push({x_pos: mountainArray[i][0], y_pos: 83});
+    }
+    
+
+	trees_x = [158, 1854, 1022, 3078];
 	trees_y = floorPos_y - 167;
 
 	clouds = [
 		{x_pos: 250, y_pos: 100},
 		{x_pos: 500, y_pos: 200},
 		{x_pos: 750, y_pos: 40},
-		{x_pos: 100, y_pos: 150}
+		{x_pos: 100, y_pos: 150},
+		{x_pos: 1220, y_pos: 155},
+		{x_pos: 1565, y_pos: 219},
+		{x_pos: 1974, y_pos: 95},
+		{x_pos: 2331, y_pos: 195},
+		{x_pos: 2602, y_pos: 82},
+		{x_pos: 2853, y_pos: 240},
+		{x_pos: 3101, y_pos: 229},
+		{x_pos: 2958, y_pos: 98},
+		{x_pos: 3521, y_pos: 184},
 	]
 
 	collectables = [
 		{x_pos: 100, y_pos: 400, isFound: false},
-		{x_pos: 800, y_pos: 400, isFound: false},
 		{x_pos: 300, y_pos: 250, isFound: false},
-		{x_pos: 900, y_pos: 400, isFound: false}
+		{x_pos: 560, y_pos: 266, isFound: false},
+		{x_pos: 668, y_pos: 266, isFound: false},
+		{x_pos: 800, y_pos: 400, isFound: false},
+		{x_pos: 900, y_pos: 400, isFound: false},
+		{x_pos: 1000, y_pos: 400, isFound: false},
+		{x_pos: 1125, y_pos: 400, isFound: false},
+        {x_pos: 1389, y_pos: 324, isFound: false},
+        {x_pos: 1687, y_pos: 400, isFound: false},
+        {x_pos: 1987, y_pos: 400, isFound: false},
+        {x_pos: 2388, y_pos: 400, isFound: false},
+        {x_pos: 2631, y_pos: 400, isFound: false},
+        {x_pos: 2791, y_pos: 322, isFound: false},
+        {x_pos: 3100, y_pos: 400, isFound: false},
+        {x_pos: 3405, y_pos: 400, isFound: false},
+        {x_pos: 3651, y_pos: 400, isFound: false},
+        
 	]
+
 
 	canyons = [
-		{x_pos: 400, width: 100},
-		{x_pos: 1215, width: 100},
+		{x_pos: 400, width: 300},
+		{x_pos: 1215, width: 400},
 		{x_pos: 2000, width: 100},
-		{x_pos: 2684, width: 100}
+		{x_pos: 2684, width: 300},
+        {x_pos: 3168, width: 100},
 	]
 
+    for (let i = 0; i < canyonArray.length; i++) {
+        canyons.push({x_pos: canyonArray[i][0], width: 100});
+    }
+
     flagpole = {
-        x_pos: 3000,
+        x_pos: 4000,
         isReached: false,
         flag_height:  360
     }
 
-    platforms = [createPlatform(100, 300, 150)];
+    platforms = [
+        createPlatform(300, 350, 174), 
+        createPlatform(518, 294, 174),
+        createPlatform(1300, 350, 175),
+        createPlatform(2700, 360, 175),
+        createPlatform(3008, 357, 174),
+        createPlatform(3308, 300, 174),
+    ]
 
-    Enemies = [new Enemy(640, floorPos_y, 100, 1)]; 
+    enemies = [new Enemy(680, 500), new Enemy(1646, 300),new Enemy(2122, 200), new Enemy(2322, 150), new Enemy(3500, 400)];
 }
 
 function drawLifeTokens() {
@@ -851,43 +913,42 @@ function drawLifeTokens() {
     }
 }
 
-function createPlatform(x, y, length) {
+function createPlatform(x, y, width) {
     let plat = {
         x : x,
         y : y,
-        length: length,
-        width: (57/174) * length,
+        width: 180,
+        height: (5/18) * width,
         draw: function() {
             fill(255, 0, 255);
-            image(platformImage, this.x, this.y, 174, 57);
+            image(platformImage, this.x, this.y, this.width, this.height);
         },
         checkIfOnTop: function() {
-            if (this.x < gameChar_world_x && gameChar_world_x < (this.x + this.length + 40) && gameCharBottom_y < this.y && (this.y - gameCharLength-12) < gameCharTop_y) {
-                onPlatform = true;
-            } else {
-                onPlatform = false;
-            }
+            return this.x < gameChar_world_x && gameChar_world_x < (this.x + this.width) && gameCharBottom_y < this.y && (this.y - gameCharLength-12) < gameCharTop_y
+        },
+        checkIfAbove: function() {
+            return this.x < gameChar_world_x && gameChar_world_x < (this.x + this.width) && gameCharBottom_y < this.y
         }
     }
     return plat;
 }
 
-function Enemy(x, y, movementRange, speed) {
-    duck = forwardDuck;
+function Enemy(x, movementRange) {
+    this.duck = forwardDuck;
     this.x = x;
-    this.y = y;
+    this.y = floorPos_y;
     this.movementRange = movementRange;
-    this.speed = speed;
+    this.speed = 1;
     this.currentX = x;
 
     this.update = function() {
         this.currentX += this.speed;
         if (this.currentX > this.x + this.movementRange || this.currentX < this.x) {
             this.speed = -this.speed;
-            if (duck == forwardDuck) {
-                duck = backwardDuck;
+            if (this.duck == forwardDuck) {
+                this.duck = backwardDuck;
             } else {
-                duck = forwardDuck;
+                this.duck = forwardDuck;
             }
         }   
     }
@@ -896,7 +957,7 @@ function Enemy(x, y, movementRange, speed) {
         this.update();
         this.checkContact();
         fill(255, 150, 0);
-        image(duck, this.currentX, this.y - 50, 60, 60);
+        image(this.duck, this.currentX, this.y - 50, 60, 60);
         stroke(0)
         strokeWeight(1);
     }
@@ -908,4 +969,10 @@ function Enemy(x, y, movementRange, speed) {
             quackSound.play();
         }
     }
+}
+
+function addGameObject(coordArray) {
+    window.addEventListener("click", (e) => {
+        coordArray.push([e.clientX - scrollPos, e.clientY]);
+    });
 }
