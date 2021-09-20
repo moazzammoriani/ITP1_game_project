@@ -1,3 +1,4 @@
+// Initialization of variables
 var lives
 var game_score
 var gameChar_x;
@@ -28,18 +29,21 @@ var backwardDuck;
 var mountainArray;
 var canyonArray;
 
-
+//Loading data
 function preload() {
     canyonImage = loadImage("canyon.png");
     platformImage = loadImage("platform.png");
     forwardDuck = loadImage("forwardDuck.png");
+    forwardDuckStep = loadImage("forwardDuck_step.png");
     backwardDuck = loadImage("backwardDuck.png");
+    backwardDuckStep = loadImage("backwardDuck_step.png");
 
     soundFormats('mp3', 'wav');
     backgroundMusic = loadSound('sounds/background-music.mp3');
     backgroundMusic.setVolume(0.2);
 }
 
+// Loading more data and setting values
 function setup() {
     victorySound = loadSound('victory.wav');
     victorySound.setVolume(0.4);
@@ -62,6 +66,7 @@ function setup() {
     backgroundMusic.loop();
 }
 
+// Main drawing loop
 function draw() {
     gameChar_world_x = gameChar_x - scrollPos;
 	background(255,155,255); 
@@ -106,7 +111,7 @@ function draw() {
     renderFlagpole();
     checkFlagpole();
 
-    // Platforms
+    // Draw platforms
     for (var i = 0; i < platforms.length; i++) {
         platforms[i].draw();
     }
@@ -129,6 +134,7 @@ function draw() {
         onPlatform = false;
     }
 
+    // Draw enemies
     for (var i = 0; i < enemies.length; i++) {
         enemies[i].draw();
     }
@@ -145,7 +151,8 @@ function draw() {
 
     drawGameChar();
 
-	if (isJumping && gameChar_y > jumpRange) { //Jumping-action implementation
+    //Jumping-action implementation
+	if (isJumping && gameChar_y > jumpRange) { 
 		gameChar_y -= 10;
 	}
 
@@ -153,33 +160,39 @@ function draw() {
         isJumping = false;
     }
 
-	if (isFalling || isPlummeting) { //Gravity implementation
+    //Gravity implementation
+	if (isFalling || isPlummeting) { 
 		gameChar_y += 5;
 	}
 
+    // Game score text
     fill(255);
     noStroke();
     textSize(24);
     text("Score: " + game_score, 30, 30);
+
+    // Indicating lives left
     for (let i = 0; i < lives; i++) {
         drawLifeTokens();
     }
 
+    // Game over logic
     if (lives < 1) {
         textSize(40);
         text("GAME OVER", 350, 320);
         textSize(30);
-        text("Press space to continue", 350, 370);
-        return;
+        text("Press F5 to Replay", 350, 370);
+        noLoop();
 
     }
 
+    // Level completion logic
     if (flagpole.isReached) {
         if (flagpole.flag_height <= 150) {
             textSize(40);
             text("LEVEL COMPLETE", 350, 320);
             textSize(30);
-            text("Press space to continue", 350, 370);
+            text("Press F5 to replay", 350, 370);
             noLoop();
             backgroundMusic.stop();
             victorySound.play();
@@ -220,6 +233,7 @@ function keyReleased() {
 	}
 }
 
+// Draws gameChar
 function drawGameChar() {
 	if (isLeft && isFalling) { //Draws the game character when it is falling and facing left
 		//head
@@ -636,6 +650,7 @@ function drawGameChar() {
         
 }
 
+// Draws clouds
 function drawClouds() {
 	for (var i = 0; i < clouds.length; i++) {
 			fill(255);
@@ -650,6 +665,7 @@ function drawClouds() {
 	}
 }
 
+// Draws mountain
 function drawMountains() {
 	for (var i = 0; i < mountains.length; i++) {
 		fill(90);
@@ -663,6 +679,7 @@ function drawMountains() {
 	}
 }
 
+// Draws trees
 function drawTrees() {
 	for (var i = 0; i < trees_x.length; i++) {
 		noStroke();
@@ -702,10 +719,12 @@ function drawTrees() {
 	}
 }
 
+// Draws canyon
 function drawCanyon(t_canyon) {
     image(canyonImage, t_canyon.x_pos, floorPos_y, t_canyon.width, 150);
 }
 
+// Manages canyon interaction
 function checkCanyon(t_canyon) {
     if (gameChar_world_x > t_canyon.x_pos  && gameChar_world_x < (t_canyon.x_pos + t_canyon.width)) {
         betweenCanyon = true;
@@ -725,6 +744,7 @@ function checkCanyon(t_canyon) {
     }
 }
 
+// Draws collectable
 function drawCollectable(t_collectable) {
 		if (!t_collectable.isFound) {
             fill(252, 197, 18);
@@ -747,6 +767,7 @@ function drawCollectable(t_collectable) {
 		}
 }
 
+// Manges collectable interaction
 function checkCollectable(t_collectable) {
     if (dist(t_collectable.x_pos - 7.5, t_collectable.y_pos + 9, gameChar_world_x,
         gameChar_y - 30) < 30) {
@@ -757,6 +778,7 @@ function checkCollectable(t_collectable) {
     }
 }
 
+// Draws flagpople
 function renderFlagpole() {
     fill(120);
     rect(flagpole.x_pos, 150, 10, 282);
@@ -768,10 +790,12 @@ function renderFlagpole() {
     }
 }
 
+// Manages flagpole interaction
 function checkFlagpole() {
     if (abs(gameChar_world_x - flagpole.x_pos) < 20) flagpole.isReached = true;
 }
 
+// Excecutes the necessary chain of events to occur after the character dies
 function checkPlayerDie() {
     if ( enemyContact || touchedCanyonEdge) {
         lives -= 1;
@@ -781,6 +805,7 @@ function checkPlayerDie() {
     }
 }
 
+// Reinitializes all values to the start of the level
 function startGame() {
     game_score = 0;
 	gameChar_x = 152;
@@ -879,6 +904,7 @@ function startGame() {
     enemies = [new Enemy(680, 500), new Enemy(1646, 300),new Enemy(2122, 200), new Enemy(2322, 150), new Enemy(3500, 400)];
 }
 
+// Draws the remaining lives left for the player 
 function drawLifeTokens() {
     for (let i = 0; i < lifeToken_x.length; i++) {
         push();
@@ -913,6 +939,7 @@ function drawLifeTokens() {
     }
 }
 
+// Platform factory
 function createPlatform(x, y, width) {
     let plat = {
         x : x,
@@ -933,6 +960,7 @@ function createPlatform(x, y, width) {
     return plat;
 }
 
+// Enemy constructor
 function Enemy(x, movementRange) {
     this.duck = forwardDuck;
     this.x = x;
@@ -940,19 +968,35 @@ function Enemy(x, movementRange) {
     this.movementRange = movementRange;
     this.speed = 1;
     this.currentX = x;
+    this.facingForward = true;
 
+    // Animates enemy movement
     this.update = function() {
         this.currentX += this.speed;
         if (this.currentX > this.x + this.movementRange || this.currentX < this.x) {
             this.speed = -this.speed;
-            if (this.duck == forwardDuck) {
-                this.duck = backwardDuck;
-            } else {
-                this.duck = forwardDuck;
-            }
+            this.facingForward = !this.facingForward;
         }   
+        if (!this.facingForward) {
+            if (this.currentX % 18 == 0) {
+                if (this.duck == backwardDuck) {
+                   this.duck = backwardDuckStep; 
+                } else {
+                    this.duck = backwardDuck;
+                }
+            } 
+        } else {
+            if (this.currentX % 18 == 0) {
+                if (this.duck == forwardDuck) {
+                   this.duck = forwardDuckStep; 
+                } else {
+                    this.duck = forwardDuck;
+                }
+            }
+        }
     }
 
+    // Draws enemy 
     this.draw = function() {
         this.update();
         this.checkContact();
@@ -962,6 +1006,7 @@ function Enemy(x, movementRange) {
         strokeWeight(1);
     }
 
+    // Checks if game character has touched enemy
     this.checkContact = function() {
         // The 24 here is added because the center of the the game character's body is at gameCharTop_y + 24
         if (dist(this.currentX + 33, this.y, gameChar_world_x, gameCharTop_y+24) < 33) {
@@ -971,8 +1016,3 @@ function Enemy(x, movementRange) {
     }
 }
 
-function addGameObject(coordArray) {
-    window.addEventListener("click", (e) => {
-        coordArray.push([e.clientX - scrollPos, e.clientY]);
-    });
-}
